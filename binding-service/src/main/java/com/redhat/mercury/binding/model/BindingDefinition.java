@@ -2,22 +2,32 @@ package com.redhat.mercury.binding.model;
 
 public class BindingDefinition {
 
-    public enum BindingType {
-        QUERY,
-        COMMAND,
-        NOTIFICATION,
-        SUBSCRIPTION
+    public enum Action {
+        query,
+        command,
+        notify,
+        subscription
     }
 
+    private String domainName;
     private String scopeRef;
-    private BindingType type;
+    private Action action;
 
-    public BindingType getType() {
-        return type;
+    public String getDomainName() {
+        return domainName;
     }
 
-    public BindingDefinition setType(BindingType type) {
-        this.type = type;
+    public BindingDefinition setDomainName(String domainName) {
+        this.domainName = domainName;
+        return this;
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
+    public BindingDefinition setAction(Action action) {
+        this.action = action;
         return this;
     }
 
@@ -28,5 +38,14 @@ public class BindingDefinition {
     public BindingDefinition setScopeRef(String scopeRef) {
         this.scopeRef = scopeRef;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "BindingDefinition{" +
+                "domainName='" + domainName + '\'' +
+                ", scopeRef='" + scopeRef + '\'' +
+                ", action=" + action +
+                '}';
     }
 }

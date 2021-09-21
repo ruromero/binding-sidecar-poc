@@ -17,11 +17,9 @@ public class BindingRoutes extends RouteBuilder {
     public void configure() {
 
         from("grpc://{{route.grpc.outboundbindingservice}}/org.bian.protobuf.OutboundBindingService")
-                .recipientList(method(configSvc, "getBinding"))
-                .log("${body}");
+                .recipientList(method(configSvc, "getBinding"));
 
         from("grpc://{{route.grpc.internalbindingservice}}/org.bian.protobuf.InternalBindingService")
-                .log("${headers}")
                 .to("grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?method=" + simple("query"));
     }
 

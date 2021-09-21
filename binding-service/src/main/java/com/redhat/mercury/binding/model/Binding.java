@@ -4,7 +4,7 @@ public class Binding {
 
     private BindingDefinition definition;
 
-    private ObjectRef objectRef;
+    private String endpoint;
 
     public BindingDefinition getDefinition() {
         return definition;
@@ -15,12 +15,20 @@ public class Binding {
         return this;
     }
 
-    public ObjectRef getObjectRef() {
-        return objectRef;
+    public String getEndpoint() {
+        return endpoint;
     }
 
-    public Binding setObjectRef(ObjectRef objectRef) {
-        this.objectRef = objectRef;
+    public Binding setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Binding{" +
+                "definition=" + definition +
+                ", endpoint='" + endpoint + '\'' +
+                '}';
     }
 }

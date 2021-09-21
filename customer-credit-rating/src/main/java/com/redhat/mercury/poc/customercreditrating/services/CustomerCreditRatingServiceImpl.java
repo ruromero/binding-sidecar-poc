@@ -22,8 +22,8 @@ public class CustomerCreditRatingServiceImpl implements InboundBindingService {
     private static final Integer FIXED_RATING = 802;
 
     @Override
-    public Uni<io.cloudevents.v1.proto.CloudEvent> query(io.cloudevents.v1.proto.CloudEvent request) {
-        LOGGER.info("received request: {}", request);
+    public Uni<CloudEvent> query(CloudEvent request) {
+        LOGGER.info("received query request");
         return Uni.createFrom().item(() -> CloudEvent.newBuilder()
                 .setId(UUID.randomUUID().toString())
                 .setType(CE_RETRIVE_RATING_RESPONSE_TYPE)
@@ -32,8 +32,8 @@ public class CustomerCreditRatingServiceImpl implements InboundBindingService {
     }
 
     @Override
-    public Uni<io.cloudevents.v1.proto.CloudEvent> command(io.cloudevents.v1.proto.CloudEvent request) {
-        LOGGER.info("received request: {}", request);
+    public Uni<CloudEvent> command(CloudEvent request) {
+        LOGGER.info("received command request");
         return Uni.createFrom().item(() -> CloudEvent.newBuilder()
                 .setId(UUID.randomUUID().toString())
                 .setType(CE_RETRIVE_RATING_RESPONSE_TYPE)
@@ -43,7 +43,7 @@ public class CustomerCreditRatingServiceImpl implements InboundBindingService {
 
     @Override
     public Uni<com.google.protobuf.Empty> receive(CloudEvent request) {
-        LOGGER.info("received request: {}", request);
+        LOGGER.info("received receive request");
         return Uni.createFrom().item(() -> Empty.getDefaultInstance());
     }
 }
