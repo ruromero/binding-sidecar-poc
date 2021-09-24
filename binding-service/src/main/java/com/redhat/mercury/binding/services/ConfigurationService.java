@@ -1,5 +1,6 @@
 package com.redhat.mercury.binding.services;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,7 +9,11 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.Header;
+import org.apache.camel.Route;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.RouteDefinition;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +22,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.redhat.mercury.binding.model.Binding;
 import com.redhat.mercury.binding.model.BindingDefinition;
+import com.redhat.mercury.binding.model.k8s.BindingSpec;
+import com.redhat.mercury.binding.model.k8s.ExposedScopeSpec;
 import com.redhat.mercury.binding.model.k8s.ServiceDomainBinding;
 import com.redhat.mercury.poc.BianCloudEventConstants;
 
@@ -40,12 +47,16 @@ public class ConfigurationService {
     private static final String LABEL_SERVICE_DOMAIN = "service-domain";
     private static final String LABEL_SERVICE_TYPE = "mercury-binding";
     private static final String INTERNAL_SERVICE_TYPE = "internal";
+    private static final String HTTP_ROUTE_NAME = "http-route";
 
     @Inject
     KubernetesClient kClient;
 
     @ConfigProperty(name = "mercury.servicedomain")
     String serviceDomainName;
+
+    @Inject
+    CamelContext context;
 
     private Map<String, Binding> bindings;
 
@@ -71,13 +82,20 @@ public class ConfigurationService {
 
     @PostConstruct
     void registerWatcher() {
-        List<ServiceDomainBinding> bindings = kClient.resources(ServiceDomainBinding.class)
+        List<ServiceDomainBinding> sdBindings = kClient.resources(ServiceDomainBinding.class)
                 .inNamespace(kClient.getNamespace())
                 .withLabel(LABEL_SERVICE_DOMAIN, serviceDomainName)
                 .list()
                 .getItems();
-        if (!bindings.isEmpty()) {
-            updateBindings(bindings.get(0));
+        if (!sdBindings.isEmpty()) {
+            ServiceDomainBinding binding = sdBindings.get(0);
+            if (binding == null || binding.getSpec() == null) {
+                clearBindings();
+            } else {
+                updateBindings(binding.getSpec().getBindings());
+                updateExposedScopes(binding.getSpec().getExposedScopes());
+                updateSubscriptions(binding.getSpec().getSubscriptions());
+            }
         }
 
         kClient.resources(ServiceDomainBinding.class)
@@ -89,7 +107,7 @@ public class ConfigurationService {
                         switch (action) {
                             case ADDED:
                             case MODIFIED:
-                                updateBindings(resource);
+                                updateBindings(resource.getSpec().getBindings());
                                 break;
                             case DELETED:
                                 clearBindings();
@@ -106,14 +124,14 @@ public class ConfigurationService {
 
     }
 
-    private synchronized void updateBindings(ServiceDomainBinding bindingConfig) {
+    private synchronized void updateBindings(Collection<BindingSpec> bindingConfig) {
         Builder<String, Binding> configBuilder = ImmutableMap.builder();
-        if (bindingConfig == null || bindingConfig.getSpec() == null || bindingConfig.getSpec().getBindings() == null) {
+        if (bindingConfig == null || bindingConfig.isEmpty()) {
             LOGGER.info("Empty bindingConfig received, clearing bindings");
             clearBindings();
             return;
         }
-        bindingConfig.getSpec().getBindings().forEach(b -> {
+        bindingConfig.forEach(b -> {
             BindingDefinition def = new BindingDefinition().setDomainName(b.getServiceDomain())
                     .setScopeRef(b.getScopeRef()).setAction(parseAction(b.getAction()));
             Binding binding = new Binding().setDefinition(def).setEndpoint(getEndpoint(def));
@@ -128,9 +146,52 @@ public class ConfigurationService {
         LOGGER.info("Registered all bindings");
     }
 
+    private synchronized void updateExposedScopes(Collection<ExposedScopeSpec> exposedScopes) {
+        if (exposedScopes == null || exposedScopes.isEmpty()) {
+            clearExposedServices();
+        }
+        if(context.getRoute(HTTP_ROUTE_NAME) != null) {
+            return;
+        }
+        RouteBuilder definition = new RouteBuilder() {
+            @Override
+            public void configure() throws Exception {
+                from("platform-http:")
+                        .id(HTTP_ROUTE_NAME)
+                        .bean(BianCloudEventMarshaller.class, "httpToCloudEvent")
+                        .to("grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?method=" + simple("query"));
+                //TODO: Dynamically set method using metadata
+            }
+        };
+        try {
+            context.addRoutes(definition);
+        } catch (Exception e) {
+            LOGGER.error("Unable to remove {} route", HTTP_ROUTE_NAME, e);
+        }
+    }
+
+    private synchronized void updateSubscriptions(Collection<String> subscriptions) {
+        if (subscriptions == null || subscriptions.isEmpty()) {
+            clearSubscriptions();
+        }
+        //TODO: Implement
+    }
+
     private synchronized void clearBindings() {
         LOGGER.info("Removing any existing binding");
+        clearExposedServices();
+        clearSubscriptions();
         ConfigurationService.this.bindings = ImmutableMap.of();
+    }
+
+    private synchronized void clearExposedServices() {
+        //TODO: remove exposedServices
+        throw new UnsupportedOperationException("implement");
+    }
+
+    private synchronized void clearSubscriptions() {
+        //TODO: remove subscriptions
+        throw new UnsupportedOperationException("implement");
     }
 
     private BindingDefinition.Action parseAction(String action) {

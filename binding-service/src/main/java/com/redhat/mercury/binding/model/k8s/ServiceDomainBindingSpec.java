@@ -10,6 +10,8 @@ public class ServiceDomainBindingSpec implements Serializable {
 
     private String serviceDomain;
     private Collection<BindingSpec> bindings;
+    private Collection<ExposedScopeSpec> exposedScopes;
+    private Collection<String> subscriptions;
 
     public String getServiceDomain() {
         return serviceDomain;
@@ -26,6 +28,24 @@ public class ServiceDomainBindingSpec implements Serializable {
 
     public ServiceDomainBindingSpec setBindings(Collection<BindingSpec> bindings) {
         this.bindings = bindings;
+        return this;
+    }
+
+    public Collection<ExposedScopeSpec> getExposedScopes() {
+        return exposedScopes;
+    }
+
+    public ServiceDomainBindingSpec setExposedScopes(Collection<ExposedScopeSpec> exposedScopes) {
+        this.exposedScopes = exposedScopes;
+        return this;
+    }
+
+    public Collection<String> getSubscriptions() {
+        return subscriptions;
+    }
+
+    public ServiceDomainBindingSpec setSubscriptions(Collection<String> subscriptions) {
+        this.subscriptions = subscriptions;
         return this;
     }
 }

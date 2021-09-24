@@ -21,6 +21,21 @@ spec:
               required:
                 - bindings
               properties:
+                exposedScopes:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - scopeRef
+                      - action
+                    properties:
+                      scopeRef:
+                        type: string
+                        action:
+                          type: string
+                          enum:
+                            - query
+                            - command
                 bindings:
                   type: array
                   items:
@@ -40,7 +55,7 @@ spec:
                           - query
                           - command
                           - notify
-                notifications:
+                subscriptions:
                   type: array
                   items:
                     type: string
