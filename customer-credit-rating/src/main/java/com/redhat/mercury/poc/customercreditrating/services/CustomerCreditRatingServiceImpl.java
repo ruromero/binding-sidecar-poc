@@ -28,7 +28,8 @@ public class CustomerCreditRatingServiceImpl implements InboundBindingService {
                 .setId(UUID.randomUUID().toString())
                 .setType(CE_RETRIVE_RATING_RESPONSE_TYPE)
                 .setSource("http://customer-credit-rating")
-                .setProtoData(Any.pack(Rating.newBuilder().setRating(FIXED_RATING).build())).build());
+                .setProtoData(Any.pack(Rating.newBuilder().setRating(FIXED_RATING).build()))
+                .build());
     }
 
     @Override
@@ -38,7 +39,8 @@ public class CustomerCreditRatingServiceImpl implements InboundBindingService {
                 .setId(UUID.randomUUID().toString())
                 .setType(CE_RETRIVE_RATING_RESPONSE_TYPE)
                 .setSource("http://customer-credit-rating")
-                .setProtoData(Any.pack(Rating.newBuilder().setRating(FIXED_RATING).build())).build());
+                .setProtoData(Any.pack(Rating.newBuilder().setRating(FIXED_RATING).build()))
+                .build());
     }
 
     @Override

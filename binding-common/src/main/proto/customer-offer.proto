@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package org.bian.protobuf.customeroffer;
+
+
+option java_multiple_files = true;
+option java_package = "org.bian.protobuf.customeroffer";
+
+message CustomerOfferNotification {
+  string status = 1;
+  BasicReference customerOfferReference = 2;
+  CustomerReference customerReference = 3;
+  FacilityApplicationReference facilityApplicationReference = 4;
+  BasicReference consumerLoanReference = 5;
+}
+
+message BasicReference {
+  string id = 1;
+  string status = 2;
+}
+
+message CustomerReference {
+  string id = 1;
+  string name = 2;
+}
+
+message FacilityApplicationReference {
+  string productCode = 1;
+}

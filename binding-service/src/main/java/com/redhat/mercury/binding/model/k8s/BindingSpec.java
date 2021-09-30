@@ -37,4 +37,13 @@ public class BindingSpec implements Serializable {
         this.action = action;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "BindingSpec{" +
+                "serviceDomain='" + serviceDomain + '\'' +
+                ", scopeRef='" + scopeRef + '\'' +
+                ", action='" + action + '\'' +
+                '}';
+    }
 }

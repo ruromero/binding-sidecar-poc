@@ -25,4 +25,12 @@ public class ExposedScopeSpec {
         this.action = action;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "ExposedScopeSpec{" +
+                "scopeRef='" + scopeRef + '\'' +
+                ", action='" + action + '\'' +
+                '}';
+    }
 }

@@ -12,6 +12,6 @@ spec:
     - serviceDomain: customer-credit-rating
       scopeRef: customercreditrating
       action: command
-    - serviceDomain: customer-credit-rating
-      scopeRef: customercreditrating
-      action: notify
+  exposedScopes:
+    - scopeRef: customeroffer
+      action: command

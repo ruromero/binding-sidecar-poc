@@ -1,9 +1,10 @@
 package com.redhat.mercury.binding.services;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -13,8 +14,6 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Header;
 import org.apache.camel.Route;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.RouteDefinition;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,48 +23,52 @@ import com.redhat.mercury.binding.model.Binding;
 import com.redhat.mercury.binding.model.BindingDefinition;
 import com.redhat.mercury.binding.model.k8s.BindingSpec;
 import com.redhat.mercury.binding.model.k8s.ExposedScopeSpec;
-import com.redhat.mercury.binding.model.k8s.ServiceDomainBinding;
+import com.redhat.mercury.binding.model.k8s.SubscriptionSpec;
 import com.redhat.mercury.poc.BianCloudEventConstants;
 
 import io.cloudevents.v1.proto.CloudEvent;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.Watcher;
-import io.fabric8.kubernetes.client.WatcherException;
+import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
+@Startup
 @ApplicationScoped
 @RegisterForReflection
 public class ConfigurationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationService.class);
 
-    private static final String KAFKA_ENDPOINT = "kafka:%s?brokers=%s";
-    private static final String GRPC_ENDPOINT = "grpc://%s/org.bian.protobuf.InternalBindingService?method=%s";
-
-    private static final String LABEL_SERVICE_DOMAIN = "service-domain";
-    private static final String LABEL_SERVICE_TYPE = "mercury-binding";
-    private static final String INTERNAL_SERVICE_TYPE = "internal";
     private static final String HTTP_ROUTE_NAME = "http-route";
-
-    @Inject
-    KubernetesClient kClient;
-
-    @ConfigProperty(name = "mercury.servicedomain")
-    String serviceDomainName;
+    private static final String SUBSCRIPTION_ROUTE_PREFIX = "subscription.";
 
     @Inject
     CamelContext context;
 
+    @Inject
+    KubernetesResourceService k8sService;
+
     private Map<String, Binding> bindings;
 
-    public String getBinding(CloudEvent cloudEventType, @Header("CamelGrpcMethodName") String method) {
-        String ref = cloudEventType.getType().replace(BianCloudEventConstants.CE_TYPE_PREFIX, "");
+    @PostConstruct
+    void initialize() {
+        k8sService.registerWatcher(binding -> {
+            if (binding == null) {
+                clearBindings();
+            } else {
+                updateBindings(binding.getSpec().getBindings());
+                updateExposedScopes(binding.getSpec().getExposedScopes());
+                updateSubscriptions(binding.getSpec().getSubscriptions());
+            }
+        });
+    }
+
+    public String getBinding(CloudEvent cloudEvent, @Header("CamelGrpcMethodName") String method) {
+        String ref = cloudEvent.getType().replace(BianCloudEventConstants.CE_TYPE_PREFIX, "");
         Binding binding = reduceBinding(ref, method);
         if (binding != null) {
+            LOGGER.debug("Redirecting to: {}", binding.getEndpoint());
             return binding.getEndpoint();
         }
+        LOGGER.error("No binding found for event type {} and method {}", cloudEvent.getType(), method);
         throw new IllegalStateException("Unable to calculate a valid QueryRoute");
     }
 
@@ -80,51 +83,7 @@ public class ConfigurationService {
         return reduceBinding(type.substring(0, type.lastIndexOf(".")), method);
     }
 
-    @PostConstruct
-    void registerWatcher() {
-        List<ServiceDomainBinding> sdBindings = kClient.resources(ServiceDomainBinding.class)
-                .inNamespace(kClient.getNamespace())
-                .withLabel(LABEL_SERVICE_DOMAIN, serviceDomainName)
-                .list()
-                .getItems();
-        if (!sdBindings.isEmpty()) {
-            ServiceDomainBinding binding = sdBindings.get(0);
-            if (binding == null || binding.getSpec() == null) {
-                clearBindings();
-            } else {
-                updateBindings(binding.getSpec().getBindings());
-                updateExposedScopes(binding.getSpec().getExposedScopes());
-                updateSubscriptions(binding.getSpec().getSubscriptions());
-            }
-        }
-
-        kClient.resources(ServiceDomainBinding.class)
-                .inNamespace(kClient.getNamespace())
-                .withLabel(LABEL_SERVICE_DOMAIN, serviceDomainName)
-                .watch(new Watcher<>() {
-                    @Override
-                    public void eventReceived(Action action, ServiceDomainBinding resource) {
-                        switch (action) {
-                            case ADDED:
-                            case MODIFIED:
-                                updateBindings(resource.getSpec().getBindings());
-                                break;
-                            case DELETED:
-                                clearBindings();
-                                break;
-                            default:
-                                LOGGER.warn("Unexpected event while watching serviceDomainBindings {}", serviceDomainName, action);
-                        }
-                    }
-
-                    @Override
-                    public void onClose(WatcherException cause) {
-                    }
-                });
-
-    }
-
-    private synchronized void updateBindings(Collection<BindingSpec> bindingConfig) {
+    public synchronized void updateBindings(Collection<BindingSpec> bindingConfig) {
         Builder<String, Binding> configBuilder = ImmutableMap.builder();
         if (bindingConfig == null || bindingConfig.isEmpty()) {
             LOGGER.info("Empty bindingConfig received, clearing bindings");
@@ -134,7 +93,7 @@ public class ConfigurationService {
         bindingConfig.forEach(b -> {
             BindingDefinition def = new BindingDefinition().setDomainName(b.getServiceDomain())
                     .setScopeRef(b.getScopeRef()).setAction(parseAction(b.getAction()));
-            Binding binding = new Binding().setDefinition(def).setEndpoint(getEndpoint(def));
+            Binding binding = new Binding().setDefinition(def).setEndpoint(k8sService.getEndpoint(def));
             if (binding != null || binding.getEndpoint() == null) {
                 configBuilder.put(String.join(".", def.getScopeRef(), def.getAction().name()), binding);
                 LOGGER.info("Added binding {}", binding);
@@ -146,21 +105,22 @@ public class ConfigurationService {
         LOGGER.info("Registered all bindings");
     }
 
-    private synchronized void updateExposedScopes(Collection<ExposedScopeSpec> exposedScopes) {
+    public synchronized void updateExposedScopes(Collection<ExposedScopeSpec> exposedScopes) {
         if (exposedScopes == null || exposedScopes.isEmpty()) {
             clearExposedServices();
         }
-        if(context.getRoute(HTTP_ROUTE_NAME) != null) {
+        if (context.getRoute(HTTP_ROUTE_NAME) != null) {
             return;
         }
         RouteBuilder definition = new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from("platform-http:")
+            public void configure() {
+                from("platform-http:/{{mercury.servicedomain}}")
                         .id(HTTP_ROUTE_NAME)
                         .bean(BianCloudEventMarshaller.class, "httpToCloudEvent")
-                        .to("grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?method=" + simple("query"));
-                //TODO: Dynamically set method using metadata
+                        //TODO: Dynamically set method using metadata
+                        .to("grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?synchronous=true&method=query")
+                        .bean(BianCloudEventMarshaller.class, "toHttp");
             }
         };
         try {
@@ -170,28 +130,79 @@ public class ConfigurationService {
         }
     }
 
-    private synchronized void updateSubscriptions(Collection<String> subscriptions) {
+    public synchronized void updateSubscriptions(Collection<SubscriptionSpec> subscriptions) {
         if (subscriptions == null || subscriptions.isEmpty()) {
             clearSubscriptions();
         }
-        //TODO: Implement
+        Map<String, RouteBuilder> expected = new HashMap<>();
+        subscriptions.forEach(s -> {
+            String routeName = SUBSCRIPTION_ROUTE_PREFIX + s.getServiceDomain();
+            try {
+                expected.put(routeName, new RouteBuilder() {
+                    @Override
+                    public void configure() {
+                        from("kafka:" + getTopicName(s.getServiceDomain()) + "?brokers={{mercury.kafka.brokers}}&valueDeserializer=com.redhat.mercury.binding.services.CustomerOfferEventDeserializer")
+                                .id(routeName)
+                                .to("grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?method=receive");
+                    }
+                });
+                LOGGER.debug("Create subscription {}", s);
+            } catch (Exception e) {
+                LOGGER.error("Unable to update subscription for: {}", s.getServiceDomain());
+            }
+        });
+        Set<String> missingRoutes = new HashSet<>();
+        context.getRoutes().forEach(r -> {
+            if (r.getId().startsWith(SUBSCRIPTION_ROUTE_PREFIX) && !expected.containsKey(r.getId())) {
+                missingRoutes.add(r.getId());
+            }
+        });
+        missingRoutes.forEach(r -> {
+            try {
+                context.removeRoute(r);
+            } catch (Exception e) {
+                LOGGER.error("Unable to remove Route: {}", r, e);
+            }
+        });
+        expected.forEach((k, v) -> {
+            if (context.getRoute(k) == null) {
+                try {
+                    context.addRoutes(v);
+                } catch (Exception e) {
+                    LOGGER.error("Unable to add new subscription route: {}", k, e);
+                }
+            }
+        });
+
     }
 
-    private synchronized void clearBindings() {
+    public synchronized void clearBindings() {
         LOGGER.info("Removing any existing binding");
         clearExposedServices();
         clearSubscriptions();
         ConfigurationService.this.bindings = ImmutableMap.of();
     }
 
-    private synchronized void clearExposedServices() {
-        //TODO: remove exposedServices
-        throw new UnsupportedOperationException("implement");
+    public synchronized void clearExposedServices() {
+        LOGGER.debug("Removing exposed services");
+        try {
+            context.removeRoute(HTTP_ROUTE_NAME);
+        } catch (Exception e) {
+            LOGGER.error("Unable to remove ExposedServiceRoute: {}", HTTP_ROUTE_NAME, e);
+        }
     }
 
-    private synchronized void clearSubscriptions() {
-        //TODO: remove subscriptions
-        throw new UnsupportedOperationException("implement");
+    public synchronized void clearSubscriptions() {
+        LOGGER.debug("Removing subscriptions");
+        for(Route r : context.getRoutes()) {
+            if(r.getId().startsWith(SUBSCRIPTION_ROUTE_PREFIX)) {
+                try {
+                    context.removeRoute(r.getId());
+                } catch (Exception e) {
+                    LOGGER.error("Unable to remove Subscription route: {}", r.getId(), e);
+                }
+            }
+        }
     }
 
     private BindingDefinition.Action parseAction(String action) {
@@ -200,47 +211,12 @@ public class ConfigurationService {
                 return BindingDefinition.Action.query;
             case "command":
                 return BindingDefinition.Action.command;
-            case "notify":
-                return BindingDefinition.Action.notify;
-            //TODO: subscriptions
             default:
                 return null;
         }
     }
 
-    private String getEndpoint(BindingDefinition definition) {
-        switch (definition.getAction()) {
-            case query:
-            case command:
-                return String.format(GRPC_ENDPOINT,
-                        getInternalBindingService(definition.getDomainName()),
-                        definition.getAction().name());
-            case notify:
-                return String.format(KAFKA_ENDPOINT, definition.getScopeRef(), "mercury-broker:9092");
-            default:
-                LOGGER.warn("Ignoring unsupported binding action: {}", definition.getAction());
-                return null;
-        }
-    }
-
-    private String getInternalBindingService(String serviceDomainName) {
-        //TODO: Support multiple namespaces
-        Map<String, String> expectedLabels = Map.of(LABEL_SERVICE_DOMAIN, serviceDomainName, LABEL_SERVICE_TYPE, INTERNAL_SERVICE_TYPE);
-        List<Service> services = kClient.services().inNamespace(kClient.getNamespace()).withLabels(expectedLabels).list().getItems();
-        if (services == null || services.isEmpty()) {
-            return null;
-        }
-        if (services.size() > 1) {
-            LOGGER.error("Multiple services retrieved, expected 1. Got: {}", services.size());
-            return null;
-        }
-        Service service = services.get(0);
-        String name = service.getMetadata().getName();
-        Optional<ServicePort> port = service.getSpec().getPorts().stream().filter(p -> p.getName().equals(INTERNAL_SERVICE_TYPE)).findFirst();
-        if (port.isPresent()) {
-            return name + ":" + port.get().getPort();
-        }
-        LOGGER.error("Missing expected port with name {} in service {}", INTERNAL_SERVICE_TYPE, service.getMetadata().getName());
-        return null;
+    private String getTopicName(String serviceDomainName) {
+        return serviceDomainName.toUpperCase().replace("-", "_");
     }
 }

@@ -18,8 +18,6 @@ spec:
           properties:
             spec:
               type: object
-              required:
-                - bindings
               properties:
                 exposedScopes:
                   type: array
@@ -31,11 +29,11 @@ spec:
                     properties:
                       scopeRef:
                         type: string
-                        action:
-                          type: string
-                          enum:
-                            - query
-                            - command
+                      action:
+                        type: string
+                        enum:
+                          - query
+                          - command
                 bindings:
                   type: array
                   items:
@@ -54,9 +52,18 @@ spec:
                         enum:
                           - query
                           - command
-                          - notify
                 subscriptions:
                   type: array
                   items:
-                    type: string
+                    type: object
+                    required:
+                      - serviceDomain
+                      - events
+                    properties:
+                      serviceDomain:
+                        type: string
+                      events:
+                        type: array
+                        items:
+                          type: string
 

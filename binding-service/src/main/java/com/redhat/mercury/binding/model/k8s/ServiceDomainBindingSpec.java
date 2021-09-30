@@ -11,7 +11,7 @@ public class ServiceDomainBindingSpec implements Serializable {
     private String serviceDomain;
     private Collection<BindingSpec> bindings;
     private Collection<ExposedScopeSpec> exposedScopes;
-    private Collection<String> subscriptions;
+    private Collection<SubscriptionSpec> subscriptions;
 
     public String getServiceDomain() {
         return serviceDomain;
@@ -40,12 +40,22 @@ public class ServiceDomainBindingSpec implements Serializable {
         return this;
     }
 
-    public Collection<String> getSubscriptions() {
+    public Collection<SubscriptionSpec> getSubscriptions() {
         return subscriptions;
     }
 
-    public ServiceDomainBindingSpec setSubscriptions(Collection<String> subscriptions) {
+    public ServiceDomainBindingSpec setSubscriptions(Collection<SubscriptionSpec> subscriptions) {
         this.subscriptions = subscriptions;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "ServiceDomainBindingSpec{" +
+                "serviceDomain='" + serviceDomain + '\'' +
+                ", bindings=" + bindings +
+                ", exposedScopes=" + exposedScopes +
+                ", subscriptions=" + subscriptions +
+                '}';
     }
 }
