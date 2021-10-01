@@ -143,12 +143,12 @@ class BindingRoutesTest {
                                 .build()))
                         .build())
                 .build();
-//        kServer.getClient().resource(partyRoutingBinding).inNamespace(kServer.getClient().getNamespace()).createOrReplace();
+        kServer.getClient().resource(partyRoutingBinding).inNamespace(kServer.getClient().getNamespace()).createOrReplace();
 
-//        Awaitility
-//                .await()
-//                .atMost(10, TimeUnit.SECONDS)
-//                .until(() -> camel.getRoute("subscription.customer-offer") != null);
+        Awaitility
+                .await()
+                .atMost(10, TimeUnit.SECONDS)
+                .until(() -> camel.getRoute("subscription.customer-offer") != null);
 
         BeanCounter counter = new BeanCounter(5);
         camel.addRoutes(new RouteBuilder() {

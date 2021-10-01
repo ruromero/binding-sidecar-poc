@@ -3,7 +3,6 @@ package com.redhat.mercury.binding.test;
 import java.util.Map;
 
 import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 

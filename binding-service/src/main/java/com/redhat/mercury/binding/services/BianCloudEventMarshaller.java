@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import org.apache.camel.Exchange;
 import org.bian.protobuf.customercreditrating.Rating;
-import org.bian.protobuf.partyroutingprofile.PartyRoutingState;
 import org.bian.protobuf.partyroutingprofile.PartyRoutingStateList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +94,7 @@ public class BianCloudEventMarshaller {
     }
 
     private void addRefToCE(Builder builder, Matcher matcher, int group, String ref) {
-        if(matcher.groupCount() >= group) {
+        if (matcher.groupCount() >= group) {
             String value = matcher.group(group);
             LOGGER.debug("Set {} to {}", ref, value);
             builder.putAttributes(ref, CloudEventAttributeValue.newBuilder().setCeString(value).build());

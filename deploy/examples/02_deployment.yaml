@@ -25,6 +25,8 @@ spec:
           env:
             - name: QUARKUS_HTTP_PORT
               value: "8081"
+            - name: MERCURY_SERVICEDOMAIN
+              value: customer-credit-rating
         - name: binding-service
           image: quay.io/ruben/bian-binding-service:latest
           env:
@@ -83,6 +85,8 @@ spec:
           env:
             - name: QUARKUS_HTTP_PORT
               value: "8081"
+            - name: MERCURY_SERVICEDOMAIN
+              value: customer-offer
         - name: binding-service
           image: quay.io/ruben/bian-binding-service:latest
           env:
@@ -139,6 +143,8 @@ spec:
             - containerPort: 10001
               name: inbound
           env:
+            - name: MERCURY_SERVICEDOMAIN
+              value: party-routing-profile
             - name: QUARKUS_HTTP_PORT
               value: "8081"
         - name: binding-service
