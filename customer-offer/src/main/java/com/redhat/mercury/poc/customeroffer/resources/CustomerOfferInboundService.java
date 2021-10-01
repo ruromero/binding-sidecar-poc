@@ -2,16 +2,14 @@ package com.redhat.mercury.poc.customeroffer.resources;
 
 import java.util.UUID;
 
-import javax.ws.rs.NotFoundException;
-
 import org.bian.protobuf.InboundBindingService;
 import org.bian.protobuf.OutboundBindingService;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.Empty;
-import com.redhat.mercury.poc.BianCloudEventConstants;
+import com.redhat.mercury.poc.constants.BianCloudEvent;
+import com.redhat.mercury.poc.constants.CustomerCreditRating;
 
 import io.cloudevents.v1.proto.CloudEvent;
 import io.cloudevents.v1.proto.CloudEvent.CloudEventAttributeValue;
@@ -53,10 +51,10 @@ public class CustomerOfferInboundService implements InboundBindingService {
         return CloudEvent.newBuilder()
                 .setId(UUID.randomUUID().toString())
                 .setSource(CUSTOMER_OFFER_SOURCE)
-                .setType(BianCloudEventConstants.CUSTOMER_CREDIT_RATING_STATE_RETRIEVE)
-                .putAttributes(BianCloudEventConstants.CE_CR_REF, CloudEventAttributeValue
+                .setType(CustomerCreditRating.STATE_RETRIEVE)
+                .putAttributes(BianCloudEvent.CE_CR_REF, CloudEventAttributeValue
                         .newBuilder()
-                        .setCeString(source.getAttributesOrThrow(BianCloudEventConstants.CE_CR_REF)
+                        .setCeString(source.getAttributesOrThrow(BianCloudEvent.CE_CR_REF)
                                 .getCeString())
                         .build())
                 .build();

@@ -31,9 +31,9 @@ public class KubernetesResourceService {
     private static final String KAFKA_ENDPOINT = "kafka:%s?brokers=%s";
     private static final String GRPC_ENDPOINT = "grpc://%s/org.bian.protobuf.InternalBindingService?method=%s";
 
-    private static final String LABEL_SERVICE_DOMAIN = "service-domain";
-    private static final String LABEL_SERVICE_TYPE = "mercury-binding";
-    private static final String INTERNAL_SERVICE_TYPE = "internal";
+    public static final String LABEL_SERVICE_DOMAIN = "service-domain";
+    public static final String LABEL_SERVICE_TYPE = "mercury-binding";
+    public static final String INTERNAL_SERVICE_TYPE = "internal";
 
     @Inject
     KubernetesClient kClient;

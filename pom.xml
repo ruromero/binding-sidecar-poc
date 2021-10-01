@@ -19,6 +19,8 @@
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <cloudevents.version>2.2.0</cloudevents.version>
         <testcontainers.version>1.6.0</testcontainers.version>
+        <lombok.version>1.18.16</lombok.version>
+        <builder-annotations.version>0.24.3</builder-annotations.version>
     </properties>
 
     <dependencyManagement>
@@ -47,6 +49,16 @@
                 <groupId>org.testcontainers</groupId>
                 <artifactId>kafka</artifactId>
                 <version>${testcontainers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.sundr</groupId>
+                <artifactId>builder-annotations</artifactId>
+                <version>${builder-annotations.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

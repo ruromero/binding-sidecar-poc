@@ -11,6 +11,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
 import org.apache.camel.Header;
 import org.apache.camel.Route;
 import org.apache.camel.builder.RouteBuilder;
@@ -24,11 +25,15 @@ import com.redhat.mercury.binding.model.BindingDefinition;
 import com.redhat.mercury.binding.model.k8s.BindingSpec;
 import com.redhat.mercury.binding.model.k8s.ExposedScopeSpec;
 import com.redhat.mercury.binding.model.k8s.SubscriptionSpec;
-import com.redhat.mercury.poc.BianCloudEventConstants;
+import com.redhat.mercury.poc.constants.BianCloudEvent;
 
 import io.cloudevents.v1.proto.CloudEvent;
 import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+
+import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_ACTION;
+import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_ACTION_COMMAND;
+import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_ACTION_QUERY;
 
 @Startup
 @ApplicationScoped
@@ -37,8 +42,8 @@ public class ConfigurationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationService.class);
 
-    private static final String HTTP_ROUTE_NAME = "http-route";
-    private static final String SUBSCRIPTION_ROUTE_PREFIX = "subscription.";
+    public static final String HTTP_ROUTE_NAME = "http-route";
+    public static final String SUBSCRIPTION_ROUTE_PREFIX = "subscription.";
 
     @Inject
     CamelContext context;
@@ -62,7 +67,7 @@ public class ConfigurationService {
     }
 
     public String getBinding(CloudEvent cloudEvent, @Header("CamelGrpcMethodName") String method) {
-        String ref = cloudEvent.getType().replace(BianCloudEventConstants.CE_TYPE_PREFIX, "");
+        String ref = cloudEvent.getType().replace(BianCloudEvent.CE_TYPE_PREFIX, "");
         Binding binding = reduceBinding(ref, method);
         if (binding != null) {
             LOGGER.debug("Redirecting to: {}", binding.getEndpoint());
@@ -101,13 +106,14 @@ public class ConfigurationService {
                 LOGGER.warn("Ignoring incorrect binding {}", binding);
             }
         });
-        ConfigurationService.this.bindings = configBuilder.build();
+        this.bindings = configBuilder.build();
         LOGGER.info("Registered all bindings");
     }
 
     public synchronized void updateExposedScopes(Collection<ExposedScopeSpec> exposedScopes) {
         if (exposedScopes == null || exposedScopes.isEmpty()) {
             clearExposedServices();
+            return;
         }
         if (context.getRoute(HTTP_ROUTE_NAME) != null) {
             return;
@@ -115,24 +121,36 @@ public class ConfigurationService {
         RouteBuilder definition = new RouteBuilder() {
             @Override
             public void configure() {
-                from("platform-http:/{{mercury.servicedomain}}")
-                        .id(HTTP_ROUTE_NAME)
+                from("platform-http:/{{mercury.servicedomain}}?matchOnUriPrefix=true")
+                        .routeId(HTTP_ROUTE_NAME)
                         .bean(BianCloudEventMarshaller.class, "httpToCloudEvent")
-                        //TODO: Dynamically set method using metadata
-                        .to("grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?synchronous=true&method=query")
+                        .recipientList(method(ConfigurationService.class, "buildInboundBindingRoute"))
                         .bean(BianCloudEventMarshaller.class, "toHttp");
             }
         };
         try {
             context.addRoutes(definition);
+            LOGGER.debug("Register {} route", HTTP_ROUTE_NAME);
         } catch (Exception e) {
-            LOGGER.error("Unable to remove {} route", HTTP_ROUTE_NAME, e);
+            LOGGER.error("Unable to register {} route", HTTP_ROUTE_NAME, e);
         }
+    }
+
+    public String buildInboundBindingRoute(Exchange exchange) {
+        CloudEvent ce = (CloudEvent) exchange.getMessage().getBody();
+        if (ce.containsAttributes(CE_ACTION)) {
+            String action = ce.getAttributesOrThrow(CE_ACTION).getCeString();
+            return "grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?synchronous=true&method=" + action;
+        }
+        LOGGER.warn("Unable to retrieve CE_ACTION from CloudEvent attributes");
+        return null;
     }
 
     public synchronized void updateSubscriptions(Collection<SubscriptionSpec> subscriptions) {
         if (subscriptions == null || subscriptions.isEmpty()) {
+            LOGGER.debug("Clear subscriptions");
             clearSubscriptions();
+            return;
         }
         Map<String, RouteBuilder> expected = new HashMap<>();
         subscriptions.forEach(s -> {
@@ -142,7 +160,7 @@ public class ConfigurationService {
                     @Override
                     public void configure() {
                         from("kafka:" + getTopicName(s.getServiceDomain()) + "?brokers={{mercury.kafka.brokers}}&valueDeserializer=com.redhat.mercury.binding.services.CustomerOfferEventDeserializer")
-                                .id(routeName)
+                                .routeId(routeName)
                                 .to("grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?method=receive");
                     }
                 });
@@ -194,8 +212,8 @@ public class ConfigurationService {
 
     public synchronized void clearSubscriptions() {
         LOGGER.debug("Removing subscriptions");
-        for(Route r : context.getRoutes()) {
-            if(r.getId().startsWith(SUBSCRIPTION_ROUTE_PREFIX)) {
+        for (Route r : context.getRoutes()) {
+            if (r.getId().startsWith(SUBSCRIPTION_ROUTE_PREFIX)) {
                 try {
                     context.removeRoute(r.getId());
                 } catch (Exception e) {
@@ -207,9 +225,9 @@ public class ConfigurationService {
 
     private BindingDefinition.Action parseAction(String action) {
         switch (action) {
-            case "query":
+            case CE_ACTION_QUERY:
                 return BindingDefinition.Action.query;
-            case "command":
+            case CE_ACTION_COMMAND:
                 return BindingDefinition.Action.command;
             default:
                 return null;

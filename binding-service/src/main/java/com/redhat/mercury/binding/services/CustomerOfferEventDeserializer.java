@@ -13,7 +13,8 @@ import org.slf4j.LoggerFactory;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
-import com.redhat.mercury.poc.BianCloudEventConstants;
+import com.redhat.mercury.poc.constants.BianCloudEvent;
+import com.redhat.mercury.poc.constants.CustomerOffer;
 
 import io.cloudevents.v1.proto.CloudEvent;
 import io.cloudevents.v1.proto.CloudEvent.CloudEventAttributeValue;
@@ -41,16 +42,16 @@ public class CustomerOfferEventDeserializer implements Deserializer<CloudEvent> 
                     .setProtoData(Any.pack(notification));
             switch (notification.getStatus()) {
                 case OFFER_COMPLETED_EVENT_STATUS:
-                    ceBuilder.setType(BianCloudEventConstants.CUSTOMER_OFFER_COMPLETED);
+                    ceBuilder.setType(CustomerOffer.CUSTOMER_OFFER_COMPLETED);
                     break;
                 case OFFER_INITIATED_EVENT_STATUS:
-                    ceBuilder.setType(BianCloudEventConstants.CUSTOMER_OFFER_INITIATED);
+                    ceBuilder.setType(CustomerOffer.CUSTOMER_OFFER_INITIATED);
                     break;
                 default:
                     LOGGER.warn("Unknown notification status {}", notification.getStatus());
             }
             return ceBuilder.setSource(CUSTOMER_OFFER_SOURCE)
-                    .putAttributes(BianCloudEventConstants.CE_CR_REF, CloudEventAttributeValue.newBuilder()
+                    .putAttributes(BianCloudEvent.CE_CR_REF, CloudEventAttributeValue.newBuilder()
                             .setCeString(notification.getCustomerReference().getId())
                             .build())
                     .build();

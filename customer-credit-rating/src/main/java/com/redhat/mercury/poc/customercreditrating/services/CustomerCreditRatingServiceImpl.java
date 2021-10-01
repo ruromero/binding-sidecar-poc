@@ -9,8 +9,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
+import com.redhat.mercury.poc.constants.BianCloudEvent;
+import com.redhat.mercury.poc.constants.CustomerCreditRating;
 
 import io.cloudevents.v1.proto.CloudEvent;
+import io.cloudevents.v1.proto.CloudEvent.CloudEventAttributeValue;
 import io.quarkus.grpc.GrpcService;
 import io.smallrye.mutiny.Uni;
 
@@ -18,7 +21,6 @@ import io.smallrye.mutiny.Uni;
 public class CustomerCreditRatingServiceImpl implements InboundBindingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerCreditRatingServiceImpl.class);
-    private static final String CE_RETRIVE_RATING_RESPONSE_TYPE = "org.bian.customercreditrating.retrieve/response";
     private static final Integer FIXED_RATING = 802;
 
     @Override
@@ -26,8 +28,9 @@ public class CustomerCreditRatingServiceImpl implements InboundBindingService {
         LOGGER.info("received query request");
         return Uni.createFrom().item(() -> CloudEvent.newBuilder()
                 .setId(UUID.randomUUID().toString())
-                .setType(CE_RETRIVE_RATING_RESPONSE_TYPE)
+                .setType(CustomerCreditRating.STATE_RETRIEVE)
                 .setSource("http://customer-credit-rating")
+                .putAttributes(BianCloudEvent.CE_ACTION, CloudEventAttributeValue.newBuilder().setCeString(BianCloudEvent.CE_ACTION_RESPONSE).build())
                 .setProtoData(Any.pack(Rating.newBuilder().setRating(FIXED_RATING).build()))
                 .build());
     }
@@ -37,7 +40,7 @@ public class CustomerCreditRatingServiceImpl implements InboundBindingService {
         LOGGER.info("received command request");
         return Uni.createFrom().item(() -> CloudEvent.newBuilder()
                 .setId(UUID.randomUUID().toString())
-                .setType(CE_RETRIVE_RATING_RESPONSE_TYPE)
+                .setType(CustomerCreditRating.STATE_RETRIEVE)
                 .setSource("http://customer-credit-rating")
                 .setProtoData(Any.pack(Rating.newBuilder().setRating(FIXED_RATING).build()))
                 .build());

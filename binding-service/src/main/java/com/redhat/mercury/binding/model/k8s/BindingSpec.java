@@ -2,48 +2,30 @@ package com.redhat.mercury.binding.model.k8s;
 
 import java.io.Serializable;
 
-import io.quarkus.runtime.annotations.RegisterForReflection;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-@RegisterForReflection
+import io.sundr.builder.annotations.Buildable;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonDeserialize
+@ToString
+@EqualsAndHashCode
+@Getter
+@Setter
+@Accessors(chain = true)
+@Buildable(editableEnabled = false, lazyCollectionInitEnabled = false, builderPackage = "io.fabric8.kubernetes.api.builder")
 public class BindingSpec implements Serializable {
 
     private String serviceDomain;
     private String scopeRef;
     private String action;
 
-    public String getServiceDomain() {
-        return serviceDomain;
-    }
-
-    public BindingSpec setServiceDomain(String serviceDomain) {
-        this.serviceDomain = serviceDomain;
-        return this;
-    }
-
-    public String getScopeRef() {
-        return scopeRef;
-    }
-
-    public BindingSpec setScopeRef(String scopeRef) {
-        this.scopeRef = scopeRef;
-        return this;
-    }
-
-    public String getAction() {
-        return action;
-    }
-
-    public BindingSpec setAction(String action) {
-        this.action = action;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return "BindingSpec{" +
-                "serviceDomain='" + serviceDomain + '\'' +
-                ", scopeRef='" + scopeRef + '\'' +
-                ", action='" + action + '\'' +
-                '}';
-    }
 }
+

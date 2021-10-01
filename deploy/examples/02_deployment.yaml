@@ -30,10 +30,6 @@ spec:
           env:
             - name: MERCURY_SERVICEDOMAIN
               value: customer-credit-rating
-            - name: QUARKUS_LOG_LEVEL
-              value: DEBUG
-            - name: QUARKUS_LOG_MIN-LEVEL
-              value: DEBUG
             - name: MERCURY_KAFKA_BROKERS
               value: my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
           ports:
@@ -94,10 +90,6 @@ spec:
               value: customer-offer
             - name: MERCURY_KAFKA_BROKERS
               value: my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
-            - name: QUARKUS_LOG_LEVEL
-              value: DEBUG
-            - name: QUARKUS_LOG_MIN-LEVEL
-              value: DEBUG
           ports:
             - containerPort: 10100
               name: outbound
@@ -154,10 +146,6 @@ spec:
           env:
             - name: MERCURY_SERVICEDOMAIN
               value: party-routing-profile
-            - name: QUARKUS_LOG_LEVEL
-              value: DEBUG
-            - name: QUARKUS_LOG_MIN-LEVEL
-              value: DEBUG
             - name: MERCURY_KAFKA_BROKERS
               value: my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
           ports:

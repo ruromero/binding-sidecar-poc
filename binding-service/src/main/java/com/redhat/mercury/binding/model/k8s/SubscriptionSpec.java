@@ -1,38 +1,30 @@
 package com.redhat.mercury.binding.model.k8s;
 
+import java.io.Serializable;
 import java.util.Collection;
 
-import io.quarkus.runtime.annotations.RegisterForReflection;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-@RegisterForReflection
-public class SubscriptionSpec {
+import io.sundr.builder.annotations.Buildable;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonDeserialize
+@ToString
+@EqualsAndHashCode
+@Getter
+@Setter
+@Accessors(chain = true)
+@Buildable(editableEnabled = false, lazyCollectionInitEnabled = false, builderPackage = "io.fabric8.kubernetes.api.builder")
+public class SubscriptionSpec implements Serializable {
 
     private String serviceDomain;
     private Collection<String> events;
 
-    public String getServiceDomain() {
-        return serviceDomain;
-    }
-
-    public SubscriptionSpec setServiceDomain(String serviceDomain) {
-        this.serviceDomain = serviceDomain;
-        return this;
-    }
-
-    public Collection<String> getEvents() {
-        return events;
-    }
-
-    public SubscriptionSpec setEvents(Collection<String> events) {
-        this.events = events;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return "SubscriptionSpec{" +
-                "serviceDomain='" + serviceDomain + '\'' +
-                ", events=" + events +
-                '}';
-    }
 }

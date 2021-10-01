@@ -5,17 +5,17 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.model.annotation.Group;
 import io.fabric8.kubernetes.model.annotation.Version;
+import io.sundr.builder.annotations.Buildable;
+import io.sundr.builder.annotations.BuildableReference;
 
-@Group("mercury.redhat.io")
-@Version("v1alpha1")
+@Group(ServiceDomainBinding.GROUP)
+@Version(ServiceDomainBinding.VERSION)
+@Buildable(editableEnabled = false, lazyCollectionInitEnabled = false, builderPackage = "io.fabric8.kubernetes.api.builder", refs = {
+        @BuildableReference(CustomResource.class)
+})
 public class ServiceDomainBinding extends CustomResource<ServiceDomainBindingSpec, Void> implements Namespaced {
 
-    public ServiceDomainBinding() {
-        super();
-    }
+    public static final String GROUP = "mercury.redhat.io";
+    public static final String VERSION = "v1alpha1";
 
-    public ServiceDomainBinding(String metaName, ServiceDomainBindingSpec spec) {
-        setMetadata(new ObjectMetaBuilder().withName(metaName).build());
-        setSpec(spec);
-    }
 }

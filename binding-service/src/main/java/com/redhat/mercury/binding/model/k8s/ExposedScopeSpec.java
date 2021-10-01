@@ -1,36 +1,29 @@
 package com.redhat.mercury.binding.model.k8s;
 
-import io.quarkus.runtime.annotations.RegisterForReflection;
+import java.io.Serializable;
 
-@RegisterForReflection
-public class ExposedScopeSpec {
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.sundr.builder.annotations.Buildable;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonDeserialize
+@ToString
+@EqualsAndHashCode
+@Getter
+@Setter
+@Accessors(chain = true)
+@Buildable(editableEnabled = false, lazyCollectionInitEnabled = false, builderPackage = "io.fabric8.kubernetes.api.builder")
+public class ExposedScopeSpec implements Serializable {
 
     private String scopeRef;
     private String action;
 
-    public String getScopeRef() {
-        return scopeRef;
-    }
-
-    public ExposedScopeSpec setScopeRef(String scopeRef) {
-        this.scopeRef = scopeRef;
-        return this;
-    }
-
-    public String getAction() {
-        return action;
-    }
-
-    public ExposedScopeSpec setAction(String action) {
-        this.action = action;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return "ExposedScopeSpec{" +
-                "scopeRef='" + scopeRef + '\'' +
-                ", action='" + action + '\'' +
-                '}';
-    }
 }

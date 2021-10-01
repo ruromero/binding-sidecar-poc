@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.redhat.mercury.poc.constants.BianCloudEvent;
 
 import io.cloudevents.v1.proto.CloudEvent;
 import io.cloudevents.v1.proto.CloudEvent.Builder;
@@ -23,10 +24,10 @@ import io.cloudevents.v1.proto.CloudEvent.CloudEventAttributeValue;
 import io.quarkus.grpc.GrpcService;
 import io.smallrye.mutiny.Uni;
 
-import static com.redhat.mercury.poc.BianCloudEventConstants.CE_CR_REF;
-import static com.redhat.mercury.poc.BianCloudEventConstants.CUSTOMER_OFFER_COMPLETED;
-import static com.redhat.mercury.poc.BianCloudEventConstants.CUSTOMER_OFFER_INITIATED;
-import static com.redhat.mercury.poc.BianCloudEventConstants.PARTY_ROUTING_PROFILE_RETRIEVE_RESPONSE;
+import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_CR_REF;
+import static com.redhat.mercury.poc.constants.CustomerOffer.CUSTOMER_OFFER_COMPLETED;
+import static com.redhat.mercury.poc.constants.CustomerOffer.CUSTOMER_OFFER_INITIATED;
+import static com.redhat.mercury.poc.constants.PartyRoutingProfile.PARTY_STATE_STATUS_RETRIEVE;
 
 @GrpcService
 public class PartyRoutingProfileServiceImpl implements InboundBindingService {
@@ -40,7 +41,8 @@ public class PartyRoutingProfileServiceImpl implements InboundBindingService {
         return Uni.createFrom().item(() -> {
             Builder eventBuilder = CloudEvent.newBuilder()
                     .setId(UUID.randomUUID().toString())
-                    .setType(PARTY_ROUTING_PROFILE_RETRIEVE_RESPONSE)
+                    .setType(PARTY_STATE_STATUS_RETRIEVE)
+                    .putAttributes(BianCloudEvent.CE_ACTION, CloudEventAttributeValue.newBuilder().setCeString(BianCloudEvent.CE_ACTION_RESPONSE).build())
                     .setSource("http://party-routing-profile");
             CloudEventAttributeValue cr = request.getAttributesMap().get(CE_CR_REF);
             PartyRoutingStateList.Builder resultBuilder = PartyRoutingStateList.newBuilder();
