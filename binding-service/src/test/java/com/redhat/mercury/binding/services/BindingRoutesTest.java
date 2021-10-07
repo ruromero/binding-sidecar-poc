@@ -29,9 +29,9 @@ import com.redhat.mercury.binding.model.k8s.ServiceDomainBindingBuilder;
 import com.redhat.mercury.binding.model.k8s.ServiceDomainBindingSpecBuilder;
 import com.redhat.mercury.binding.model.k8s.SubscriptionSpecBuilder;
 import com.redhat.mercury.binding.test.Profiles.KafkaIntegrationProfile;
-import com.redhat.mercury.poc.constants.BianCloudEvent;
-import com.redhat.mercury.poc.constants.CustomerOffer;
-import com.redhat.mercury.poc.constants.PartyRoutingProfile;
+import com.redhat.mercury.constants.BianCloudEvent;
+import com.redhat.mercury.constants.CustomerOffer;
+import com.redhat.mercury.constants.PartyRoutingProfile;
 
 import io.cloudevents.v1.proto.CloudEvent;
 import io.cloudevents.v1.proto.CloudEvent.CloudEventAttributeValue;
@@ -45,11 +45,11 @@ import io.quarkus.test.kubernetes.client.KubernetesTestServer;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 
 import static com.redhat.mercury.binding.services.ConfigurationService.HTTP_ROUTE_NAME;
-import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_ACTION;
-import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_ACTION_QUERY;
-import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_ACTION_RESPONSE;
-import static com.redhat.mercury.poc.constants.CustomerOffer.CUSTOMER_OFFER_COMPLETED;
-import static com.redhat.mercury.poc.constants.CustomerOffer.CUSTOMER_OFFER_INITIATED;
+import static com.redhat.mercury.constants.BianCloudEvent.CE_ACTION;
+import static com.redhat.mercury.constants.BianCloudEvent.CE_ACTION_QUERY;
+import static com.redhat.mercury.constants.BianCloudEvent.CE_ACTION_RESPONSE;
+import static com.redhat.mercury.constants.CustomerOffer.CUSTOMER_OFFER_COMPLETED;
+import static com.redhat.mercury.constants.CustomerOffer.CUSTOMER_OFFER_INITIATED;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest

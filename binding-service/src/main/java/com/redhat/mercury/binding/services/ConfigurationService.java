@@ -11,7 +11,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
 import org.apache.camel.Header;
 import org.apache.camel.Route;
 import org.apache.camel.builder.RouteBuilder;
@@ -25,15 +24,14 @@ import com.redhat.mercury.binding.model.BindingDefinition;
 import com.redhat.mercury.binding.model.k8s.BindingSpec;
 import com.redhat.mercury.binding.model.k8s.ExposedScopeSpec;
 import com.redhat.mercury.binding.model.k8s.SubscriptionSpec;
-import com.redhat.mercury.poc.constants.BianCloudEvent;
+import com.redhat.mercury.constants.BianCloudEvent;
 
 import io.cloudevents.v1.proto.CloudEvent;
 import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
-import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_ACTION;
-import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_ACTION_COMMAND;
-import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_ACTION_QUERY;
+import static com.redhat.mercury.constants.BianCloudEvent.CE_ACTION_COMMAND;
+import static com.redhat.mercury.constants.BianCloudEvent.CE_ACTION_QUERY;
 
 @Startup
 @ApplicationScoped
@@ -123,8 +121,8 @@ public class ConfigurationService {
             public void configure() {
                 from("platform-http:/{{mercury.servicedomain}}?matchOnUriPrefix=true")
                         .routeId(HTTP_ROUTE_NAME)
-                        .bean(BianCloudEventMarshaller.class, "httpToCloudEvent")
-                        .recipientList(method(ConfigurationService.class, "buildInboundBindingRoute"))
+                        .bean(BianCloudEventMarshaller.class, "httpToExternalRequest")
+                        .to("grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?synchronous=true&method=external")
                         .bean(BianCloudEventMarshaller.class, "toHttp");
             }
         };
@@ -134,16 +132,6 @@ public class ConfigurationService {
         } catch (Exception e) {
             LOGGER.error("Unable to register {} route", HTTP_ROUTE_NAME, e);
         }
-    }
-
-    public String buildInboundBindingRoute(Exchange exchange) {
-        CloudEvent ce = (CloudEvent) exchange.getMessage().getBody();
-        if (ce.containsAttributes(CE_ACTION)) {
-            String action = ce.getAttributesOrThrow(CE_ACTION).getCeString();
-            return "grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?synchronous=true&method=" + action;
-        }
-        LOGGER.warn("Unable to retrieve CE_ACTION from CloudEvent attributes");
-        return null;
     }
 
     public synchronized void updateSubscriptions(Collection<SubscriptionSpec> subscriptions) {

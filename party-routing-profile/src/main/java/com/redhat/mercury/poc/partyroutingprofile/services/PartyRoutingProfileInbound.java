@@ -8,6 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 
+import org.bian.protobuf.ExternalRequest;
+import org.bian.protobuf.ExternalResponse;
+import org.bian.protobuf.InboundBindingService;
 import org.bian.protobuf.customeroffer.CustomerOfferNotification;
 import org.bian.protobuf.partyroutingprofile.PartyRoutingState;
 import org.bian.protobuf.partyroutingprofile.PartyRoutingStateList;
@@ -19,7 +22,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.redhat.mercury.poc.business.service.BaseInboundBindingService;
-import com.redhat.mercury.poc.constants.BianCloudEvent;
+import com.redhat.mercury.constants.BianCloudEvent;
 
 import io.cloudevents.v1.proto.CloudEvent;
 import io.cloudevents.v1.proto.CloudEvent.Builder;
@@ -27,15 +30,15 @@ import io.cloudevents.v1.proto.CloudEvent.CloudEventAttributeValue;
 import io.quarkus.grpc.GrpcService;
 import io.smallrye.mutiny.Uni;
 
-import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_BQ_REF;
-import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_CR_REF;
-import static com.redhat.mercury.poc.constants.BianCloudEvent.CE_SD_REF;
-import static com.redhat.mercury.poc.constants.CustomerOffer.CUSTOMER_OFFER_COMPLETED;
-import static com.redhat.mercury.poc.constants.CustomerOffer.CUSTOMER_OFFER_INITIATED;
-import static com.redhat.mercury.poc.constants.PartyRoutingProfile.PARTY_STATE_STATUS_RETRIEVE;
+import static com.redhat.mercury.constants.BianCloudEvent.CE_BQ_REF;
+import static com.redhat.mercury.constants.BianCloudEvent.CE_CR_REF;
+import static com.redhat.mercury.constants.BianCloudEvent.CE_SD_REF;
+import static com.redhat.mercury.constants.CustomerOffer.CUSTOMER_OFFER_COMPLETED;
+import static com.redhat.mercury.constants.CustomerOffer.CUSTOMER_OFFER_INITIATED;
+import static com.redhat.mercury.constants.PartyRoutingProfile.PARTY_STATE_STATUS_RETRIEVE;
 
 @GrpcService
-public class PartyRoutingProfileInbound extends BaseInboundBindingService {
+public class PartyRoutingProfileInbound implements InboundBindingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PartyRoutingProfileInbound.class);
     private static final Map<String, Set<PartyRoutingState>> partyRoutings = new ConcurrentHashMap<>();
@@ -85,6 +88,11 @@ public class PartyRoutingProfileInbound extends BaseInboundBindingService {
             }
             return Empty.getDefaultInstance();
         });
+    }
+
+    @Override
+    public Uni<ExternalResponse> external(ExternalRequest request) {
+        return null;
     }
 
     private void updatePartyRoutingState(CustomerOfferNotification notification, String status, String processId) {

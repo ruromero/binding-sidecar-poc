@@ -15,12 +15,8 @@
   <dependencies>
     <dependency>
       <groupId>com.redhat.mercury</groupId>
-      <artifactId>binding-common</artifactId>
+      <artifactId>customer-credit-rating-client</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-grpc</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -29,10 +25,6 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-arc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.cloudevents</groupId>
-      <artifactId>cloudevents-protobuf</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

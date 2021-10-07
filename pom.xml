@@ -15,12 +15,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>2.2.3.Final</quarkus.platform.version>
+        <quarkus.platform.version>2.3.0.Final</quarkus.platform.version>
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <cloudevents.version>2.2.0</cloudevents.version>
         <testcontainers.version>1.6.0</testcontainers.version>
         <lombok.version>1.18.16</lombok.version>
         <builder-annotations.version>0.24.3</builder-annotations.version>
+        <hamcrest.version>2.1</hamcrest.version>
     </properties>
 
     <dependencyManagement>
@@ -60,13 +61,18 @@
                 <artifactId>builder-annotations</artifactId>
                 <version>${builder-annotations.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-core</artifactId>
+                <version>${hamcrest.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <modules>
         <module>binding-common</module>
+        <module>binding-service</module>
         <module>customer-credit-rating</module>
         <module>customer-offer</module>
         <module>party-routing-profile</module>
-        <module>binding-service</module>
     </modules>
 </project>

@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
-import com.redhat.mercury.poc.constants.BianCloudEvent;
-import com.redhat.mercury.poc.constants.CustomerOffer;
+import com.redhat.mercury.constants.BianCloudEvent;
+import com.redhat.mercury.constants.CustomerOffer;
 
 import io.cloudevents.v1.proto.CloudEvent;
 import io.cloudevents.v1.proto.CloudEvent.CloudEventAttributeValue;
