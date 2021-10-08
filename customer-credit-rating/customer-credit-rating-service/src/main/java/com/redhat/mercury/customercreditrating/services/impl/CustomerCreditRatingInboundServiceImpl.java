@@ -23,6 +23,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import com.redhat.mercury.constants.BianCloudEvent;
+import com.redhat.mercury.customercreditrating.CustomerCreditRating;
 import com.redhat.mercury.customercreditrating.services.CustomerCreditRatingService;
 
 import io.cloudevents.v1.proto.CloudEvent;
@@ -48,7 +49,7 @@ public class CustomerCreditRatingInboundServiceImpl implements InboundBindingSer
     private static final Pattern CUSTOMER_CREDIT_RATING_STATE_RETRIEVE = Pattern.compile("/" + DOMAIN_NAME + "/([a-zA-Z0-9\\-]+)/customer-credit-rating-state/([a-zA-Z0-9\\-]+)");
 
     private static final Map<Pattern, String> QUERY_PATH_MAPPINGS = Map.of(
-            CUSTOMER_CREDIT_RATING_STATE_RETRIEVE, CustomerCreditRatingService.RETRIEVE_CUSTOMER_CREDIT_RATING_STATE
+            CUSTOMER_CREDIT_RATING_STATE_RETRIEVE, CustomerCreditRating.STATE_RETRIEVE_TYPE
     );
     private static final Map<Pattern, String> COMMAND_PATH_MAPPINGS = Map.of(
             //TODO: Implement
@@ -58,7 +59,7 @@ public class CustomerCreditRatingInboundServiceImpl implements InboundBindingSer
     );
 
     private static final Map<String, Class> OUT_TYPE_MAPPINGS = Map.of(
-            CustomerCreditRatingService.RETRIEVE_CUSTOMER_CREDIT_RATING_STATE, Rating.class
+            CustomerCreditRating.STATE_RETRIEVE_TYPE, Rating.class
             //TODO: Add more out type mappings
     );
 
@@ -112,7 +113,7 @@ public class CustomerCreditRatingInboundServiceImpl implements InboundBindingSer
 
     protected Uni<? extends Message> mapQueryMethod(CloudEvent cloudEvent) {
         switch (cloudEvent.getType()) {
-            case CustomerCreditRatingService.RETRIEVE_CUSTOMER_CREDIT_RATING_STATE:
+            case CustomerCreditRating.STATE_RETRIEVE_TYPE:
                 return service.retrieveCustomerCreditRatingState(getRef(cloudEvent, CE_SD_REF), getRef(cloudEvent, CE_CR_REF));
             //TODO: Add more mappings
         }

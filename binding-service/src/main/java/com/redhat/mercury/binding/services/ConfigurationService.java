@@ -121,9 +121,9 @@ public class ConfigurationService {
             public void configure() {
                 from("platform-http:/{{mercury.servicedomain}}?matchOnUriPrefix=true")
                         .routeId(HTTP_ROUTE_NAME)
-                        .bean(BianCloudEventMarshaller.class, "httpToExternalRequest")
+                        .bean(BianHttpCloudEventMarshaller.class, "toExternalRequest")
                         .to("grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?synchronous=true&method=external")
-                        .bean(BianCloudEventMarshaller.class, "toHttp");
+                        .bean(BianHttpCloudEventMarshaller.class, "toHttp");
             }
         };
         try {

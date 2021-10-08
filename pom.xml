@@ -21,7 +21,6 @@
         <testcontainers.version>1.6.0</testcontainers.version>
         <lombok.version>1.18.16</lombok.version>
         <builder-annotations.version>0.24.3</builder-annotations.version>
-        <hamcrest.version>2.1</hamcrest.version>
     </properties>
 
     <dependencyManagement>
@@ -60,11 +59,6 @@
                 <groupId>io.sundr</groupId>
                 <artifactId>builder-annotations</artifactId>
                 <version>${builder-annotations.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-core</artifactId>
-                <version>${hamcrest.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
