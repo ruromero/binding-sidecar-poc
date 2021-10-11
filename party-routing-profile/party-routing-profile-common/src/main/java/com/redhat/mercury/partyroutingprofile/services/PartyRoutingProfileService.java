@@ -4,8 +4,10 @@ import org.bian.protobuf.partyroutingprofile.PartyRoutingStateList;
 
 import io.smallrye.mutiny.Uni;
 
-public interface PartyRoutingProfileService {
+public abstract class PartyRoutingProfileService {
 
-    Uni<PartyRoutingStateList> retrievePartyStateStatus(String sdRef, String crRef, String bqRef);
+    public Uni<PartyRoutingStateList> retrievePartyStateStatus(String sdRef, String crRef, String bqRef) {
+        return Uni.createFrom().nullItem();
+    }
 
 }

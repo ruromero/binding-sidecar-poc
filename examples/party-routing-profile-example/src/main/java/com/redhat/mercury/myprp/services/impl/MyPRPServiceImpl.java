@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import io.smallrye.mutiny.Uni;
 
 @ApplicationScoped
-public class MyPRPServiceImpl implements PartyRoutingProfileService {
+public class MyPRPServiceImpl extends PartyRoutingProfileService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MyPRPServiceImpl.class);
 

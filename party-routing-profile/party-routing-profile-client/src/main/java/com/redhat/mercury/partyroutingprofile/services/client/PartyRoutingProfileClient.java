@@ -24,7 +24,7 @@ import static com.redhat.mercury.partyroutingprofile.PartyRoutingProfile.PARTY_S
 import static com.redhat.mercury.partyroutingprofile.PartyRoutingProfile.PARTY_STATE_STATUS_RETRIEVE_TYPE;
 
 @ApplicationScoped
-public class PartyRoutingProfileClient implements PartyRoutingProfileService {
+public class PartyRoutingProfileClient extends PartyRoutingProfileService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PartyRoutingProfileClient.class);
 

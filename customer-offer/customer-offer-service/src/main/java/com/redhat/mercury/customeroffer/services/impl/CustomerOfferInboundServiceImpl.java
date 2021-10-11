@@ -117,14 +117,6 @@ public class CustomerOfferInboundServiceImpl implements InboundBindingService {
         Arc.container().select(BianNotificationHandler.class).forEach(e -> eventHandlers.put(e.getType(), e));
     }
 
-    protected String getRef(CloudEvent cloudEvent, String ref) {
-        CloudEventAttributeValue value = cloudEvent.getAttributesMap().get(ref);
-        if (value == null) {
-            return null;
-        }
-        return value.getCeString();
-    }
-
     protected Uni<? extends Message> mapQueryMethod(CloudEvent cloudEvent) {
         switch (cloudEvent.getType()) {
             //TODO: Add mappings

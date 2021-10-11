@@ -23,7 +23,7 @@ import static com.redhat.mercury.customercreditrating.CustomerCreditRating.STATE
 import static com.redhat.mercury.customercreditrating.CustomerCreditRating.STATE_RETRIEVE_TYPE;
 
 @ApplicationScoped
-public class CustomerCreditRatingClient implements CustomerCreditRatingService {
+public class CustomerCreditRatingClient extends CustomerCreditRatingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerCreditRatingClient.class);
 

@@ -12,7 +12,7 @@ import org.bian.protobuf.customeroffer.CustomerOfferNotification;
 
 
 @ApplicationScoped
-public class CustomerOfferEventHandler implements CustomerOfferNotificationService {
+public class CustomerOfferEventHandler extends CustomerOfferNotificationService {
 
     @Inject
     PartyRoutingService svc;

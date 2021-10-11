@@ -1,6 +1,6 @@
 package com.redhat.mercury.partyroutingprofile.services;
 
-public interface PartyRoutingProfileNotificationService {
+public abstract class PartyRoutingProfileNotificationService {
 
     //TODO: Add PartyRoutingProfile event handler methods
 

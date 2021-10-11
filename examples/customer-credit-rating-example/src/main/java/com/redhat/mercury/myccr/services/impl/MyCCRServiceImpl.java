@@ -10,7 +10,7 @@ import javax.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 
 @ApplicationScoped
-public class MyCCRServiceImpl implements CustomerCreditRatingService {
+public class MyCCRServiceImpl extends CustomerCreditRatingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MyCCRServiceImpl.class);
     private static final Integer FIXED_RATING = 802;

@@ -2,11 +2,11 @@ package com.redhat.mercury.customeroffer.events;
 
 import org.bian.protobuf.customeroffer.CustomerOfferNotification;
 
-public interface CustomerOfferNotificationService {
+public abstract class CustomerOfferNotificationService {
 
-    void onCustomerOfferInitiated(CustomerOfferNotification notification);
+    public void onCustomerOfferInitiated(CustomerOfferNotification notification) {}
 
-    void onCustomerOfferCompleted(CustomerOfferNotification notification);
+    public void onCustomerOfferCompleted(CustomerOfferNotification notification) {}
 
     //TODO: Implement other events
 }

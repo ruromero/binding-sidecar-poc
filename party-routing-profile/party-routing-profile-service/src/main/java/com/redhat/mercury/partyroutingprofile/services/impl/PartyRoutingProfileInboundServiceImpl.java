@@ -25,7 +25,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import com.redhat.mercury.constants.BianCloudEvent;
-import com.redhat.mercury.events.BianNotification;
 import com.redhat.mercury.events.BianNotificationHandler;
 import com.redhat.mercury.exceptions.DataTransformationException;
 import com.redhat.mercury.partyroutingprofile.PartyRoutingProfile;

@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.bian.protobuf.partyroutingprofile.PartyRoutingState;
 import org.slf4j.Logger;
