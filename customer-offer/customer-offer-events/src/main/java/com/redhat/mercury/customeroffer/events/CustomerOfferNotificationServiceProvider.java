@@ -2,6 +2,8 @@ package com.redhat.mercury.customeroffer.events;
 
 import javax.enterprise.inject.Produces;
 
+import com.redhat.mercury.customeroffer.services.CustomerOfferNotificationService;
+
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.DefaultBean;
 

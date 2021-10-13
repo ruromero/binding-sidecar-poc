@@ -141,6 +141,9 @@ public class CustomerCreditRatingInboundServiceImpl implements InboundBindingSer
             try {
                 String action = GET_VERB.equals(request.getVerb()) ? CE_ACTION_QUERY : CE_ACTION_COMMAND;
                 String type = getType(path.get().pattern(), action);
+                if(type == null) {
+                    throw new IllegalStateException("Unable to retrieve the right CloudEvent type from " + path.get() + " and " + action);
+                }
                 addRefToCE(builder, path.get(), 1, CE_SD_REF);
                 addRefToCE(builder, path.get(), 2, CE_CR_REF);
                 addRefToCE(builder, path.get(), 3, CE_BQ_REF);
@@ -184,7 +187,7 @@ public class CustomerCreditRatingInboundServiceImpl implements InboundBindingSer
 
     private String getType(Pattern key, String method) {
         switch (method) {
-            case GET_VERB:
+            case CE_ACTION_QUERY:
                 return QUERY_PATH_MAPPINGS.get(key);
             default:
                 return COMMAND_PATH_MAPPINGS.get(key);

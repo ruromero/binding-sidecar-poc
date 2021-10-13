@@ -7,6 +7,7 @@ import org.bian.protobuf.customeroffer.CustomerOfferNotification;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.redhat.mercury.customeroffer.CustomerOffer;
+import com.redhat.mercury.customeroffer.services.CustomerOfferNotificationService;
 import com.redhat.mercury.events.BianNotificationHandler;
 import com.redhat.mercury.exceptions.DataTransformationException;
 

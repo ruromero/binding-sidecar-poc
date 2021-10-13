@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.redhat.mercury.binding.model.Binding;
 import com.redhat.mercury.binding.model.BindingDefinition;
+import com.redhat.mercury.binding.model.BindingDefinition.Action;
 import com.redhat.mercury.binding.model.k8s.BindingSpec;
 import com.redhat.mercury.binding.model.k8s.ExposedScopeSpec;
 import com.redhat.mercury.binding.model.k8s.SubscriptionSpec;
@@ -66,6 +67,9 @@ public class ConfigurationService {
 
     public String getBinding(CloudEvent cloudEvent, @Header("CamelGrpcMethodName") String method) {
         String ref = cloudEvent.getType().replace(BianCloudEvent.CE_TYPE_PREFIX, "");
+        if(Action.notify.equals(method)) {
+            return "kafka:{{mercury.servicedomain}}?brokers={{mercury.kafka.brokers}}";
+        }
         Binding binding = reduceBinding(ref, method);
         if (binding != null) {
             LOGGER.debug("Redirecting to: {}", binding.getEndpoint());
@@ -147,7 +151,7 @@ public class ConfigurationService {
                 expected.put(routeName, new RouteBuilder() {
                     @Override
                     public void configure() {
-                        from("kafka:" + getTopicName(s.getServiceDomain()) + "?brokers={{mercury.kafka.brokers}}&valueDeserializer=com.redhat.mercury.binding.services.CustomerOfferEventDeserializer")
+                        from("kafka:" + getTopicName(s.getServiceDomain()) + "?brokers={{mercury.kafka.brokers}}")
                                 .routeId(routeName)
                                 .to("grpc://{{route.grpc.hostservice}}/org.bian.protobuf.InboundBindingService?method=receive");
                     }

@@ -80,7 +80,7 @@ public class PartyRoutingProfileInboundServiceImpl implements InboundBindingServ
                 .transform(e -> CloudEvent.newBuilder()
                         .setId(UUID.randomUUID().toString())
                         .setType(request.getType())
-                        .setSource("http://" + DOMAIN_NAME)
+                        .setSource(DOMAIN_NAME)
                         .putAttributes(BianCloudEvent.CE_ACTION, CloudEventAttributeValue.newBuilder().setCeString(BianCloudEvent.CE_ACTION_RESPONSE).build())
                         .setProtoData(Any.pack(e))
                         .build());
@@ -94,7 +94,7 @@ public class PartyRoutingProfileInboundServiceImpl implements InboundBindingServ
                 .transform(e -> CloudEvent.newBuilder()
                         .setId(UUID.randomUUID().toString())
                         .setType(request.getType())
-                        .setSource("http://" + DOMAIN_NAME)
+                        .setSource(DOMAIN_NAME)
                         .putAttributes(BianCloudEvent.CE_ACTION, CloudEventAttributeValue.newBuilder().setCeString(BianCloudEvent.CE_ACTION_RESPONSE).build())
                         .setProtoData(Any.pack(e))
                         .build());
@@ -165,6 +165,9 @@ public class PartyRoutingProfileInboundServiceImpl implements InboundBindingServ
             try {
                 String action = GET_VERB.equals(request.getVerb()) ? CE_ACTION_QUERY : CE_ACTION_COMMAND;
                 String type = getType(path.get().pattern(), action);
+                if(type == null) {
+                    throw new IllegalStateException("Unable to retrieve the right CloudEvent type from " + path.get() + " and " + action);
+                }
                 addRefToCE(builder, path.get(), 1, CE_SD_REF);
                 addRefToCE(builder, path.get(), 2, CE_CR_REF);
                 addRefToCE(builder, path.get(), 3, CE_BQ_REF);
@@ -206,9 +209,9 @@ public class PartyRoutingProfileInboundServiceImpl implements InboundBindingServ
                 .findFirst();
     }
 
-    private String getType(Pattern key, String method) {
-        switch (method) {
-            case GET_VERB:
+    private String getType(Pattern key, String action) {
+        switch (action) {
+            case CE_ACTION_QUERY:
                 return QUERY_PATH_MAPPINGS.get(key);
             default:
                 return COMMAND_PATH_MAPPINGS.get(key);
@@ -222,7 +225,7 @@ public class PartyRoutingProfileInboundServiceImpl implements InboundBindingServ
                 return ExternalResponse.newBuilder().setResponseCode(500).build();
             }
             try {
-                return ExternalResponse.newBuilder().setResponseCode(202).setPayload(ByteString.copyFromUtf8(JsonFormat.printer().print(message))).build();
+                return ExternalResponse.newBuilder().setResponseCode(200).setPayload(ByteString.copyFromUtf8(JsonFormat.printer().print(message))).build();
             } catch (InvalidProtocolBufferException e) {
                 return ExternalResponse.newBuilder().setResponseCode(500).build();
             }

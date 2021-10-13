@@ -28,7 +28,7 @@ public class BianHttpCloudEventMarshaller {
     public void toHttp(Exchange exchange, ExternalResponse response) {
         exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, response.getResponseCode());
         if (response.getPayload() != null && !response.getPayload().isEmpty()) {
-            exchange.getMessage().setBody(response.getPayload().toString());
+            exchange.getMessage().setBody(response.getPayload().toStringUtf8());
         }
     }
 

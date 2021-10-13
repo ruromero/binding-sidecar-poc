@@ -33,7 +33,8 @@ public class CustomerCreditRatingClient extends CustomerCreditRatingService {
     @Override
     public Uni<Rating> retrieveCustomerCreditRatingState(String sd, String cr) {
         LOGGER.info("Received retrieveCustomerCreditRatingState for {}/{}", sd,cr);
-        return outbound.query(CloudEvent.newBuilder().setSource(CustomerCreditRating.DOMAIN_NAME)
+        return outbound.query(CloudEvent.newBuilder()
+                        .setSource(CustomerCreditRating.DOMAIN_NAME)
                         .setType(STATE_RETRIEVE_TYPE)
                         .putAttributes(CE_SD_REF, CloudEventAttributeValue.newBuilder()
                                 .setCeString(sd)
